@@ -3,7 +3,7 @@ from tensorflow.keras import models
 from tensorflow.keras import losses
 from tensorflow.keras import optimizers
 from tensorflow.keras import metrics
-from tensorflow import constant, reshape
+from tensorflow import reshape
 
 import util
 import numpy as np
@@ -42,16 +42,14 @@ class LLM:
 
     # x is a tensor with shape (batch_size, time_steps, features)
     def predict(self, x):
-        bos_vector = constant(
-            [[[util.get_token(util.BOS)]]], np.float32)
-
+        bos_vector = reshape(util.get_token_vector(util.BOS), (1, 1, -1))
         _, encoder_state = self.encoder.predict(x)
 
         decoder_prediction = self.decoder.predict(bos_vector, encoder_state)
         decoder_prediction = reshape(
-            decoder_prediction, (-1, config.CONTEXT_UNITS))
+            decoder_prediction, (-1, config.CONTEXT_UNITS)
+        )
 
-        print(decoder_prediction)
         char_prediction = self.char_model.predict(decoder_prediction)
 
         return char_prediction

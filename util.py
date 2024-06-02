@@ -1,26 +1,45 @@
-from tensorflow import constant
+from tensorflow import constant, zeros, concat
 
 EOS = '[EOS]'
 BOS = '[BOS]'
 UNK = '[UNK]'
+SEP = ' '
+
+
+def initToken():
+    tokens = [
+        EOS,
+        BOS,
+        SEP,
+        UNK
+    ]
+
+    for i in range(65, 91):
+        tokens.append(chr(i))
+        tokens.append(chr(i + 32))
+
+    return tokens
+
+
+TOKENS = initToken()
+
+TOKENS_LEN = len(TOKENS)
 
 
 def get_token(char):
-    if char == EOS:
-        return 0
+    for i in range(TOKENS_LEN):
+        if TOKENS[i] == char:
+            return i
 
-    if char == BOS:
-        return 1
+    return 3
 
-    if char == ' ':
-        return 2
 
-    char_code = ord(char)
+def get_token_vector(char):
+    token = get_token(char)
 
-    if char_code < 65 or char_code > 122:
-        return 3  # Unknown char
+    vector = zeros(TOKENS_LEN, 'float32')
 
-    return char_code - 61
+    return concat([vector[:token], [1.0], vector[token + 1:]], 0)
 
 
 def get_text(token):
@@ -39,10 +58,10 @@ def get_text(token):
     return chr(token + 61)
 
 
-def get_vectorized_sentence(sen):
-    vector = [[get_token(BOS)]]
+def get_sentence_vector(sen):
+    vector = [get_token_vector(BOS)]
     for c in sen:
-        vector.append([get_token(c)])
-    vector.append([get_token(EOS)])
+        vector = concat([vector, [get_token_vector(c)]], 0)
+    vector = concat([vector, [get_token_vector(EOS)]], 0)
 
-    return constant(vector, 'float32')
+    return vector
