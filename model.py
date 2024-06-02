@@ -43,13 +43,15 @@ class LLM:
     # x is a tensor with shape (batch_size, time_steps, features)
     def predict(self, x):
         bos_vector = constant(
-            [[[util.get_token(util.BOS)], [util.get_token(util.BOS)]]], np.float32)
+            [[[util.get_token(util.BOS)]]], np.float32)
+
         _, encoder_state = self.encoder.predict(x)
 
         decoder_prediction = self.decoder.predict(bos_vector, encoder_state)
         decoder_prediction = reshape(
             decoder_prediction, (-1, config.CONTEXT_UNITS))
 
+        print(decoder_prediction)
         char_prediction = self.char_model.predict(decoder_prediction)
 
         return char_prediction
