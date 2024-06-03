@@ -1,12 +1,7 @@
-from tensorflow.keras import layers
-from tensorflow.keras import models
-from tensorflow.keras import losses
-from tensorflow.keras import optimizers
-from tensorflow.keras import metrics
+from tensorflow.keras import layers, Sequential
 from tensorflow import reshape
 
 import util
-import numpy as np
 import config
 
 
@@ -20,6 +15,9 @@ class Encoder:
 
         return prediction, state
 
+    def get_trainable_weights(self):
+        return self.lstm.trainable_weights
+
 
 class Decoder:
     def __init__(self):
@@ -31,15 +29,16 @@ class Decoder:
 
         return prediction
 
+    def get_trainable_weights(self):
+        return self.lstm.trainable_weights
+
 
 class LLM:
     def __init__(self):
         self.encoder = Encoder()
         self.decoder = Decoder()
-        input_layer = layers.Input(shape=(config.CONTEXT_UNITS,))
-        dense = layers.Dense(
-            util.TOKENS_LEN, activation='softmax')(input_layer)
-        self.char_model = models.Model(inputs=input_layer, outputs=dense)
+        self.char_model = Sequential([layers.Input(shape=(config.CONTEXT_UNITS,)), layers.Dense(
+            util.TOKENS_LEN, activation='softmax')])
 
     # x is a tensor with shape (time_steps, features)
     def train_predicting(self, x, y):
@@ -54,7 +53,10 @@ class LLM:
             decoder_prediction, (-1, config.CONTEXT_UNITS)
         )
 
-        char_prediction = self.char_model.predict(
-            decoder_prediction, verbose=0)
+        char_prediction = self.char_model(
+            decoder_prediction)
 
         return reshape(char_prediction, (-1, util.TOKENS_LEN))
+
+    def get_trainable_weights(self):
+        return self.encoder.get_trainable_weights(), self.decoder.get_trainable_weights(), self.char_model.trainable_weights
