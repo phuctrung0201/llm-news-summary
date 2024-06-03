@@ -3,8 +3,8 @@ import os
 ARTICLES_PATH = "./dataset/articles"
 SUMMARIES_PATH = "./dataset/summaries"
 
+
 def load_dataset_path(limit=None):
-    limit = 100
     count = 0
     dataset_paths = []
     for topic in os.listdir(ARTICLES_PATH):
@@ -16,6 +16,7 @@ def load_dataset_path(limit=None):
             if limit != None and count >= limit:
                 return dataset_paths
     return dataset_paths
+
 
 def load_text(path):
     with open(path) as f:
