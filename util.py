@@ -1,4 +1,5 @@
-from tensorflow import constant, zeros, concat
+from tensorflow import zeros, concat
+from tensorflow.math import argmax
 
 EOS = '[EOS]'
 BOS = '[BOS]'
@@ -40,6 +41,11 @@ def get_token_vector(char):
     vector = zeros(TOKENS_LEN, 'float32')
 
     return concat([vector[:token], [1.0], vector[token + 1:]], 0)
+
+
+def get_char(token):
+    char_index = argmax(token)
+    return TOKENS[char_index]
 
 
 def get_text(token):

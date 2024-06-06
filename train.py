@@ -11,7 +11,7 @@ from datetime import datetime
 # Train the model for 2 epochs
 total_epochs = 10
 # Limit the dataset to 10 for testing
-dataset_paths = dataset.load_dataset_path(100)
+dataset_paths = dataset.load_dataset_path(500)
 dataset_size = len(dataset_paths)
 
 weights_path = "./weights/{}".format(
@@ -39,7 +39,7 @@ for epoch in range(0, total_epochs):
         summary_vector = reshape(summary_vector[:-1], [-1, util.TOKENS_LEN])
 
         with GradientTape() as tape:
-            predicted_vector = llm.train_predicting(
+            predicted_vector = llm.predict_in_training(
                 sentence_vector, summary_vector)
             loss = evaluate(label_vector, predicted_vector)
         weights = llm.get_trainable_weights()
